@@ -17,10 +17,10 @@ public class HighlighterTextStorage: NSTextStorage {
     private var highlighters = [HighlighterType]()
     
     /// Default attributes to use for styling text.
-    public var defaultAttributes: [String: AnyObject] = [
-        NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+    public var defaultAttributes: [NSAttributedStringKey: Any] = [
+        NSAttributedStringKey.font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
     ] {
-        didSet { editedAll(.EditedAttributes) }
+        didSet { editedAll(actions: .editedAttributes) }
     }
     
     // MARK: API
@@ -34,7 +34,7 @@ public class HighlighterTextStorage: NSTextStorage {
     */
     public func addHighlighter(highlighter: HighlighterType) {
         highlighters.append(highlighter)
-        editedAll(.EditedAttributes)
+        editedAll(actions: .editedAttributes)
     }
     
     // MARK: Initialization
@@ -55,18 +55,19 @@ public class HighlighterTextStorage: NSTextStorage {
         return backingStore.string
     }
     
-    public override func attributesAtIndex(location: Int, effectiveRange range: NSRangePointer) -> [String : AnyObject] {
-        return backingStore.attributesAtIndex(location, effectiveRange: range)
+    public override func attributes(at location: Int, effectiveRange range: NSRangePointer?) -> [NSAttributedStringKey : Any] {
+        return backingStore.attributes(at: location, effectiveRange: range)
     }
     
-    public override func replaceCharactersInRange(range: NSRange, withAttributedString attrString: NSAttributedString) {
-        backingStore.replaceCharactersInRange(range, withAttributedString: attrString)
-        edited(.EditedCharacters, range: range, changeInLength: attrString.length - range.length)
+
+    public override func replaceCharacters(in range: NSRange, with attrString: NSAttributedString) {
+        backingStore.replaceCharacters(in: range, with: attrString)
+        edited(.editedCharacters, range: range, changeInLength: attrString.length - range.length)
     }
     
-    public override func setAttributes(attrs: [String : AnyObject]?, range: NSRange) {
+    public override func setAttributes(_ attrs: [NSAttributedStringKey : Any]?, range: NSRange) {
         backingStore.setAttributes(attrs, range: range)
-        edited(.EditedAttributes, range: range, changeInLength: 0)
+        edited(.editedAttributes, range: range, changeInLength: 0)
     }
     
     public override func processEditing() {
@@ -76,7 +77,7 @@ public class HighlighterTextStorage: NSTextStorage {
         // for small amounts of text (which is the use case that
         // this was designed for), but would need to be optimized
         // for any kind of heavy editing.
-        highlightRange(NSRange(location: 0, length: (string as NSString).length))
+        highlightRange(range: NSRange(location: 0, length: (string as NSString).length))
         super.processEditing()
     }
     
@@ -87,11 +88,11 @@ public class HighlighterTextStorage: NSTextStorage {
     private func highlightRange(range: NSRange) {
         backingStore.beginEditing()
         setAttributes(defaultAttributes, range: range)
-        let attrString = backingStore.attributedSubstringFromRange(range).mutableCopy() as! NSMutableAttributedString
+        let attrString = backingStore.attributedSubstring(from: range).mutableCopy() as! NSMutableAttributedString
         for highlighter in highlighters {
-            highlighter.highlightAttributedString(attrString)
+            highlighter.highlightAttributedString(attributedString: attrString)
         }
-        replaceCharactersInRange(range, withAttributedString: attrString)
+        replaceCharacters(in: range, with: attrString)
         backingStore.endEditing()
     }
 }

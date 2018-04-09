@@ -15,16 +15,16 @@ public final class LinkHighlighter: HighlighterType {
     private var detector: NSDataDetector!
     
     public init() throws {
-        detector = try NSDataDetector(types: NSTextCheckingType.Link.rawValue)
+        detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
     }
     
     // MARK: HighlighterType
     
     public func highlightAttributedString(attributedString: NSMutableAttributedString) {
-        enumerateMatches(detector, string: attributedString.string) {
-            if let URL = $0.URL {
+        enumerateMatches(regex: detector, string: attributedString.string) {
+            if let URL = $0.url {
                 let linkAttributes = [
-                    NSLinkAttributeName: URL
+                    NSAttributedStringKey.link: URL
                 ]
                 attributedString.addAttributes(linkAttributes, range: $0.range)
             }

@@ -16,23 +16,23 @@ class ViewController: UIViewController {
         let attributes = MarkdownAttributes()
         let textStorage = MarkdownTextStorage(attributes: attributes)
         do {
-            textStorage.addHighlighter(try LinkHighlighter())
+            textStorage.addHighlighter(highlighter: try LinkHighlighter())
         } catch let error {
             fatalError("Error initializing LinkHighlighter: \(error)")
         }
-        textStorage.addHighlighter(MarkdownStrikethroughHighlighter())
-        textStorage.addHighlighter(MarkdownSuperscriptHighlighter())
+        textStorage.addHighlighter(highlighter: MarkdownStrikethroughHighlighter())
+        textStorage.addHighlighter(highlighter: MarkdownSuperscriptHighlighter())
         if let codeBlockAttributes = attributes.codeBlockAttributes {
-            textStorage.addHighlighter(MarkdownFencedCodeHighlighter(attributes: codeBlockAttributes))
+            textStorage.addHighlighter(highlighter: MarkdownFencedCodeHighlighter(attributes: codeBlockAttributes))
         }
         
-        let textView = MarkdownTextView(frame: CGRectZero, textStorage: textStorage)
+        let textView = MarkdownTextView(frame: CGRect.zero, textStorage: textStorage)
         textView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(textView)
         
         let views = ["textView": textView]
-        var constraints = NSLayoutConstraint.constraintsWithVisualFormat("V:|-20-[textView]-20-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        constraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|-20-[textView]-20-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        NSLayoutConstraint.activateConstraints(constraints)
+        var constraints = NSLayoutConstraint.constraints(withVisualFormat: "V:|-20-[textView]-20-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-20-[textView]-20-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        NSLayoutConstraint.activate(constraints)
     }
 }

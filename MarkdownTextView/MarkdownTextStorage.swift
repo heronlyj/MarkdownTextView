@@ -29,35 +29,35 @@ public class MarkdownTextStorage: HighlighterTextStorage {
         commonInit()
         
         if let headerAttributes = attributes.headerAttributes {
-            addHighlighter(MarkdownHeaderHighlighter(attributes: headerAttributes))
+            addHighlighter(highlighter: MarkdownHeaderHighlighter(attributes: headerAttributes))
         }
-        addHighlighter(MarkdownLinkHighlighter())
-        addHighlighter(MarkdownListHighlighter(markerPattern: "[*+-]", attributes: attributes.unorderedListAttributes, itemAttributes: attributes.unorderedListItemAttributes))
-        addHighlighter(MarkdownListHighlighter(markerPattern: "\\d+[.]", attributes: attributes.orderedListAttributes, itemAttributes: attributes.orderedListItemAttributes))
+        addHighlighter(highlighter: MarkdownLinkHighlighter())
+        addHighlighter(highlighter: MarkdownListHighlighter(markerPattern: "[*+-]", attributes: attributes.unorderedListAttributes, itemAttributes: attributes.unorderedListItemAttributes))
+        addHighlighter(highlighter: MarkdownListHighlighter(markerPattern: "\\d+[.]", attributes: attributes.orderedListAttributes, itemAttributes: attributes.orderedListItemAttributes))
         
         // From markdown.pl v1.0.1 <http://daringfireball.net/projects/markdown/>
         
         // Code blocks
-        addPattern("(?:\n\n|\\A)((?:(?:[ ]{4}|\t).*\n+)+)((?=^[ ]{0,4}\\S)|\\Z)", attributes.codeBlockAttributes)
+        addPattern(pattern: "(?:\n\n|\\A)((?:(?:[ ]{4}|\t).*\n+)+)((?=^[ ]{0,4}\\S)|\\Z)", attributes: attributes.codeBlockAttributes)
         
         // Block quotes
-        addPattern("(?:^[ \t]*>[ \t]?.+\n(.+\n)*\n*)+", attributes.blockQuoteAttributes)
+        addPattern(pattern: "(?:^[ \t]*>[ \t]?.+\n(.+\n)*\n*)+", attributes: attributes.blockQuoteAttributes)
         
         // Se-text style headers
         // H1
-        addPattern("^(?:.+)[ \t]*\n=+[ \t]*\n+", attributes.headerAttributes?.h1Attributes)
+        addPattern(pattern: "^(?:.+)[ \t]*\n=+[ \t]*\n+", attributes: attributes.headerAttributes?.h1Attributes)
         
         // H2
-        addPattern("^(?:.+)[ \t]*\n-+[ \t]*\n+", attributes.headerAttributes?.h2Attributes)
+        addPattern(pattern: "^(?:.+)[ \t]*\n-+[ \t]*\n+", attributes: attributes.headerAttributes?.h2Attributes)
         
         // Emphasis
-        addPattern("(\\*|_)(?=\\S)(.+?)(?<=\\S)\\1", attributesForTraits(.TraitItalic, attributes.emphasisAttributes))
+        addPattern(pattern: "(\\*|_)(?=\\S)(.+?)(?<=\\S)\\1", attributes: attributesForTraits(traits: .traitItalic, attributes: attributes.emphasisAttributes))
         
         // Strong
-        addPattern("(\\*\\*|__)(?=\\S)(?:.+?[*_]*)(?<=\\S)\\1", attributesForTraits(.TraitBold, attributes.strongAttributes))
+        addPattern(pattern: "(\\*\\*|__)(?=\\S)(?:.+?[*_]*)(?<=\\S)\\1", attributes: attributesForTraits(traits: .traitBold, attributes: attributes.strongAttributes))
         
         // Inline code
-        addPattern("(`+)(?:.+?)(?<!`)\\1(?!`)", attributes.inlineCodeAttributes)
+        addPattern(pattern: "(`+)(?:.+?)(?<!`)\\1(?!`)", attributes: attributes.inlineCodeAttributes)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -72,18 +72,17 @@ public class MarkdownTextStorage: HighlighterTextStorage {
     
     // MARK: Helpers
     
-    private func addPattern(pattern: String, _ attributes: TextAttributes?) {
+    private func addPattern(pattern: String, attributes: TextAttributes?) {
         if let attributes = attributes {
-            let highlighter = RegularExpressionHighlighter(regularExpression: regexFromPattern(pattern), attributes: attributes)
-            addHighlighter(highlighter)
+            let highlighter = RegularExpressionHighlighter(regularExpression: regexFromPattern(pattern: pattern), attributes: attributes)
+            addHighlighter(highlighter: highlighter)
         }
     }
     
-    private func attributesForTraits(traits: UIFontDescriptorSymbolicTraits, var _ attributes: TextAttributes?) -> TextAttributes? {
-        if let defaultFont = defaultAttributes[NSFontAttributeName] as? UIFont where attributes == nil {
-            attributes = [
-                NSFontAttributeName: fontWithTraits(traits, font: defaultFont)
-            ]
+    private func attributesForTraits(traits: UIFontDescriptorSymbolicTraits, attributes: TextAttributes?) -> TextAttributes? {
+        var attributes = attributes
+        if let defaultFont = defaultAttributes[.font] as? UIFont, attributes == nil {
+            attributes = [.font: fontWithTraits(traits: traits, font: defaultFont)]
         }
         return attributes
     }

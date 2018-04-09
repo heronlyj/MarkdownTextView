@@ -13,17 +13,15 @@ import UIKit
 */
 public final class MarkdownLinkHighlighter: HighlighterType {
     // From markdown.pl v1.0.1 <http://daringfireball.net/projects/markdown/>
-    private static let LinkRegex = regexFromPattern("\\[([^\\[]+)\\]\\([ \t]*<?(.*?)>?[ \t]*((['\"])(.*?)\\4)?\\)")
+    private static let LinkRegex = regexFromPattern(pattern: "\\[([^\\[]+)\\]\\([ \t]*<?(.*?)>?[ \t]*((['\"])(.*?)\\4)?\\)")
     
     // MARK: HighlighterType
     
     public func highlightAttributedString(attributedString: NSMutableAttributedString) {
         let string = attributedString.string
-        enumerateMatches(self.dynamicType.LinkRegex, string: string) {
-            let URLString = (string as NSString).substringWithRange($0.rangeAtIndex(2))
-            let linkAttributes = [
-                NSLinkAttributeName: URLString
-            ]
+        enumerateMatches(regex: type(of: self).LinkRegex, string: string) {
+            let URLString = (string as NSString).substring(with: $0.range(at: 2))
+            let linkAttributes = [NSAttributedStringKey.link: URLString]
             attributedString.addAttributes(linkAttributes, range: $0.range)
         }
     }
